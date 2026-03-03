@@ -1,6 +1,6 @@
 SRC=src
-FUNCTION_DEF_FILE=${SRC}/data/input/function_definition.json
-INPUT_FILE=${SRC}/data/input/function_calling_tests.json
+FUNCTION_DEF_FILE=${SRC}/data/input/functions_definition.json
+INPUT_FILE=${SRC}/data/input/functions_calling_tests.json
 OUTPUT_FILE=output.json
 
 all: ${NAME}
