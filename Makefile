@@ -1,0 +1,29 @@
+SRC=src
+FUNCTION_DEF_FILE=${SRC}/data/input/function_definition.json
+INPUT_FILE=${SRC}/data/input/function_calling_tests.json
+OUTPUT_FILE=output.json
+
+all: ${NAME}
+
+install:
+	uv sync
+
+run: ${NAME}
+	uv run python -m ${SRC} ${FUNCTION_DEF_FILE} ${INPUT_FILE} ${OUTPUT_FILE}
+
+debug: ${NAME}
+	python3 -m pdb ${SRC} ${FUNCTION_DEF_FILE} ${INPUT_FILE} ${OUTPUT_FILE}
+
+clean:
+	find . -iname "__pycache__" -type d -exec rm -rf "{}" +
+	find . -iname ".mypy_cache" -type d -exec rm -rf "{}" +
+
+lint:
+	uv run flake8 . --exclude .venv
+	uv run mypy . --warn-return-any --warn-unused-ignores --ignore-missing-imports --disallow-untyped-defs --check-untyped-defs --exclude .venv
+
+lint-strict:
+	uv run flake8 . --exclude .venv
+	uv run mypy . --strict --exclude .venv
+
+.PHONY: install run debug clean lint lint-strict
