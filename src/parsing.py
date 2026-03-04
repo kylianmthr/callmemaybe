@@ -21,7 +21,7 @@ class ParameterDict(TypedDict):
 
 def parse_json_object(
     json_object: list[FunctionsDefinitionDict],
-) -> list[FunctionsDefinitionDict]:
+) -> list[FunctionsDefinitionValidator]:
     functions_definition = []
     for function in json_object:
         parameters: list[ParametersValidator] = []

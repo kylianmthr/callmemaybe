@@ -1,7 +1,7 @@
 from typing import Annotated, Any, Callable, TypedDict
 from pydantic import AfterValidator, BaseModel, Field
 
-functions = {
+functions: dict[str, Callable[..., Any]] = {
     "fn_add_numbers": lambda: print("print"),
     "fn_greet": lambda: print("print2"),
     "fn_reverse_string": lambda: print("print3"),
@@ -10,7 +10,7 @@ functions = {
 }
 
 
-def function_validation(name: str) -> Callable:
+def function_validation(name: str) -> Callable[..., Any]:
     if name in functions:
         return functions[name]
     raise ValueError(f"Error: {name} function not found.")

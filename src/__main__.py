@@ -1,5 +1,4 @@
 import sys
-
 from pydantic import ValidationError
 from src import parsing
 
@@ -9,6 +8,7 @@ def main(argv: list[str]) -> None:
         functions_validation = parsing.parse_json_object(
             parsing.file_to_json_object(argv[1])
         )
+        print(functions_validation)
     except (
         FileNotFoundError,
         PermissionError,
