@@ -1,6 +1,7 @@
 import sys
 from pydantic import ValidationError
 from src import parsing
+from src.stages import EncodingStage
 
 
 def main(argv: list[str]) -> None:
@@ -11,6 +12,7 @@ def main(argv: list[str]) -> None:
         prompts = parsing.parse_prompts(
             parsing.file_to_prompts_object(argv[2])
         )
+        print(EncodingStage().process(prompts[0].content))
     except (
         FileNotFoundError,
         PermissionError,
