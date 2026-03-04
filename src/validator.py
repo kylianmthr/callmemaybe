@@ -27,6 +27,10 @@ class FunctionsDefinitionDict(TypedDict):
     returns: ReturnsDict
 
 
+class PromptsDict(TypedDict):
+    prompt: str
+
+
 class ParametersValidator(BaseModel):
     name: str = Field(min_length=1)
     type: str = Field(min_length=1)

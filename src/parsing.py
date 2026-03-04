@@ -4,13 +4,26 @@ from src.validator import (
     FunctionsDefinitionDict,
     FunctionsDefinitionValidator,
     ParametersValidator,
+    PromptValidator,
+    PromptsDict,
 )
 
 
-def file_to_json_object(filename: str) -> list[FunctionsDefinitionDict]:
+def file_to_functions_object(
+    filename: str,
+) -> list[FunctionsDefinitionDict]:
     with open(filename, "r") as f:
         content = f.read()
         json_object: list[FunctionsDefinitionDict] = json.loads(content)
+        return json_object
+
+
+def file_to_prompts_object(
+    filename: str,
+) -> list[PromptsDict]:
+    with open(filename, "r") as f:
+        content = f.read()
+        json_object: list[PromptsDict] = json.loads(content)
         return json_object
 
 
@@ -40,3 +53,12 @@ def parse_json_object(
                 )
             )
     return functions_definition
+
+
+def parse_prompts(
+    json_object: list[PromptsDict],
+) -> list[PromptValidator]:
+    prompts: list[PromptValidator] = []
+    for prompt in json_object:
+        prompts.append(PromptValidator(content=prompt["prompt"]))
+    return prompts
