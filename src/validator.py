@@ -1,12 +1,19 @@
 from typing import Annotated, Any, Callable, TypedDict
 from pydantic import AfterValidator, BaseModel, Field
+from src.functions import (
+    fn_add_numbers,
+    fn_get_square_root,
+    fn_greet,
+    fn_reverse_string,
+    fn_substitute_string_with_regex,
+)
 
 functions: dict[str, Callable[..., Any]] = {
-    "fn_add_numbers": lambda: print("print"),
-    "fn_greet": lambda: print("print2"),
-    "fn_reverse_string": lambda: print("print3"),
-    "fn_get_square_root": lambda: print("print4"),
-    "fn_substitute_string_with_regex": lambda: print("print4"),
+    "fn_add_numbers": fn_add_numbers,
+    "fn_greet": fn_greet,
+    "fn_reverse_string": fn_reverse_string,
+    "fn_get_square_root": fn_get_square_root,
+    "fn_substitute_string_with_regex": fn_substitute_string_with_regex,
 }
 
 
