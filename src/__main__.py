@@ -5,10 +5,12 @@ from src import parsing
 
 def main(argv: list[str]) -> None:
     try:
-        functions_validation = parsing.parse_json_object(
-            parsing.file_to_json_object(argv[1])
+        functions = parsing.parse_json_object(
+            parsing.file_to_functions_object(argv[1])
         )
-        print(functions_validation)
+        prompts = parsing.parse_prompts(
+            parsing.file_to_prompts_object(argv[2])
+        )
     except (
         FileNotFoundError,
         PermissionError,
