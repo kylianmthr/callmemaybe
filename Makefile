@@ -1,6 +1,6 @@
 SRC=src
 FUNCTION_DEF_FILE=${SRC}/data/input/functions_definition.json
-INPUT_FILE=${SRC}/data/input/functions_calling_tests.json
+INPUT_FILE=${SRC}/data/input/function_calling_tests.json
 OUTPUT_FILE=output.json
 
 all: ${NAME}
@@ -23,7 +23,7 @@ lint:
 	uv run mypy . --warn-return-any --warn-unused-ignores --ignore-missing-imports --disallow-untyped-defs --check-untyped-defs --exclude .venv
 
 lint-strict:
-	uv run flake8 . --exclude .venv
-	uv run mypy . --strict --exclude .venv
+	uv run flake8 .
+	uv run mypy .
 
 .PHONY: install run debug clean lint lint-strict
