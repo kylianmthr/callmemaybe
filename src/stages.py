@@ -11,8 +11,7 @@ class Stage(Protocol):
 class TokenizationStage:
     def process(self, data: str) -> dict[str, list[str]]:
         tokenized_dict: dict[str, list[str]] = {}
-        data = data.replace(" ", "Ġ")
-        splited_data = re.split(r"(?=[Ġ])", data)
+        splited_data = re.split(r"(?=[_])", data)
         tokenized_dict["tokenized_prompt"] = splited_data
         return tokenized_dict
 
@@ -44,9 +43,21 @@ class LogitsStage:
         return logits_dict
 
 
-class LogitsToWordStage:
-    def process(self, data: LogitsDict, model: Small_LLM_Model) -> str:
-        return model.decode(data["logits"].index(max(data["logits"])))
+class DecodeStage:
+    def process(
+        self,
+        data: LogitsDict,
+        model: Small_LLM_Model,
+        allowed_logits: list[int],
+    ) -> str:
+        data_with_allowed_logits = []
+        for token in allowed_logits:
+            data_with_allowed_logits.append(data["logits"][token])
+        if not (len(allowed_logits)):
+            return model.decode(data["logits"].index(max(data["logits"])))
+        return model.decode(
+            data["logits"].index(max(data_with_allowed_logits))
+        )
 
 
 # class StepsManager
