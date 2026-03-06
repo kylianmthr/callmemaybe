@@ -1,8 +1,9 @@
+import re
 import sys
 from pydantic import ValidationError
 from src import parsing
 from src.llm_sdk import llm_sdk
-from src.predict import JSONPredict
+from src.predict import JSONPredict, Status
 from src.stages import (
     DecodeStage,
     EncodingStage,
@@ -33,11 +34,8 @@ def main(argv: list[str]) -> None:
         # for func in functions:
         #    allowed_logits += llm.encode(func).tolist()[0]
         # print(allowed_logits)
-        sentence = """You can choose from these functions:
-fn_add_numbers, fn_greet, fn_reverse_string, fn_get_square_root, fn_substitute_string_with_regex.
-You must generate a JSON response with this format for each object:
-[
-  {
+        sentence = """You must generate a JSON response with this format:
+{
     "name": "function name",
     "description": "description of the function",
     "parameters": {
@@ -48,40 +46,52 @@ You must generate a JSON response with this format for each object:
     "returns": {
       "type": "number or string"
     }
-  }
-]
-"name" (function name),
+}
+So you have this keys:
+"name" (function name, You can choose from these functions:
+fn_add_numbers, fn_greet, fn_reverse_string, fn_get_square_root, fn_substitute_string_with_regex),
 "description" (description of the function),
 "parameters" (the parameters of the function.
-It must be objects with this format: \"something\": object, in this object, you have to include \"type\": \"type\". Type can be number or string.)
+It must be objects with this format: \"something\": object, in this object, you have to include \"type\": \"the parameter type\". Type can be number or string.)
 returns (returns of fthe function.
-It must be objects with this format: \"type\": \"type\". Type can be number or string.)
+It must be objects with this format: \"type\": \"the return type\". Type can be number or string.)
+You can use the key only one time. You can't repeat the key. DO NOT REPEAT THE KEY. You must use all of the keys
+Prefer using , over \n if you want to add another key
 """
-        sentence += prompts[1].content
+        sentence += prompts[2].content
         predict = JSONPredict()
-        last_token = ""
         while True:
             allowed_logits = []
             logits = LogitsStage().process(
                 EncodingStage().process(sentence, llm), llm
             )
-            predict.get_input_status(last_token)
+            possible_char = predict.get_possible_characters()
             if len(predict.stack):
-                if predict.stack[-1].value:
-                    for token in predict.stack[-1].value:
+                if possible_char:
+                    for token in possible_char:
                         allowed_logits += llm.encode(token).tolist()[0]
             word = DecodeStage().process(logits, llm, allowed_logits)
-            print("\n========== DEBUG ==========")
-            print("=== Logits ===")
-            print("allowed:", allowed_logits)
-            print("=== Stack ===")
-            print("stack:", predict.stack)
+            print("==== FREE TEXT ====")
+            print(predict.actual_buffer.split(":")[-1] + word)
+            if predict.get_state() == Status.FREE_TEXT and (
+                re.search(
+                    r'([^" \t]+)"',
+                    predict.actual_buffer.split(":")[-1] + word,
+                )
+            ):
+                word = word[: word.find('"') + 1]
+                print("===== OUI ======")
+            # print("\n========== DEBUG ==========")
+            # print("=== Logits ===")
+            # print("allowed:", allowed_logits)
+            # print("=== Stack ===")
+            # print("stack:", predict.stack)
             sentence += word
-            last_token = word
             print(sentence)
             print("\n")
-            if "}" in word:
+            if not (len(predict.stack)):
                 break
+            predict.manage_state(word)
         # predict = JSONPredict()
         # print("stack:", predict.stack)
         # predict.get_input_status("{")

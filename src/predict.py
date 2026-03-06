@@ -6,22 +6,15 @@ from src.llm_sdk.llm_sdk import Small_LLM_Model
 
 class Status(enum.Enum):
     START = ["{"]
-    OBJECT = [
-        " ",
-        '"',
+    INSERT_KEY = [
         "name",
         "description",
         "parameters",
         "returns",
         "type",
-        ",",
-        "\n",
-        "\t",
-        "}",
         "s",
         "a",
         "b",
-        ":",
     ]
     INSERT_STRING = ['"']
     INSERT_SEMI_COLUMN = [":"]
@@ -35,21 +28,134 @@ class Status(enum.Enum):
         "number",
         "source_string",
     ]
+    INSERT_NL = [","]
+    INSERT_ONLY_NL = [","]
+    END = ["}"]
     FREE_TEXT = None
 
 
 class JSONPredict:
     def __init__(self) -> None:
-        self.stack: list[Status] = []
-        self.stack.append(Status.START)
-        self.actual_line = ""
+        self.stack: list[Status] = [Status.START]
+        self.actual_buffer = ""
+        self.last_key = ""
         self.model = Small_LLM_Model()
+        self.keys = [
+            "name",
+            "description",
+            "parameters",
+            "returns",
+            "type",
+            "s",
+            "a",
+            "b",
+        ]
+        self.value = [
+            "fn_add_numbers",
+            "fn_greet",
+            "fn_reverse_string",
+            "fn_get_square_root",
+            "fn_substitute_string_with_regex",
+            "string",
+            "number",
+            "source_string",
+        ]
 
     def append(self, status: Status) -> None:
         self.stack.append(status)
 
     def pop(self) -> Status:
         return self.stack.pop()
+
+    def get_state(self) -> Status:
+        return self.stack[-1]
+
+    def get_possible_characters(self) -> list[str] | None:
+        if self.get_state() == Status.INSERT_KEY:
+            return self.keys
+        if self.get_state() == Status.INSERT_VALUE:
+            return self.value
+        else:
+            return self.get_state().value
+
+    def manage_state(self, last_token: str) -> bool:
+        self.actual_buffer += last_token
+        if self.get_state() == Status.START:
+            self.pop()
+            self.append(Status.INSERT_STRING)
+            self.actual_buffer = ""
+            return True
+        if self.get_state() == Status.INSERT_KEY and re.search(
+            r'"\w+$', self.actual_buffer
+        ):
+            self.pop()
+            self.append(Status.INSERT_STRING)
+            self.last_key = last_token
+            return True
+        if self.get_state() == Status.INSERT_STRING and re.search(
+            r'"([^"]+)"\s*:\s*"([^"]+)"$', self.actual_buffer
+        ):
+            self.pop()
+            self.append(Status.INSERT_NL)
+            return True
+        if self.get_state() == Status.INSERT_STRING and re.search(
+            r'"\w+"$', self.actual_buffer
+        ):
+            self.pop()
+            self.append(Status.INSERT_SEMI_COLUMN)
+            return True
+        if self.get_state() == Status.INSERT_SEMI_COLUMN:
+            self.pop()
+            self.append(Status.INSERT_STRING)
+            return True
+        if self.get_state() == Status.INSERT_STRING and re.search(
+            r'"([^"]+)"\s*:\s*"$', self.actual_buffer
+        ):
+            self.pop()
+            self.keys.remove(self.last_key)
+            if self.last_key == "description":
+                self.append(Status.FREE_TEXT)
+                return True
+            self.append(Status.INSERT_VALUE)
+            return True
+        if (self.get_state() == Status.FREE_TEXT) and re.search(
+            r'"([^"]+)"\s*:\s*"([^"]+)"$', self.actual_buffer
+        ):
+            self.pop()
+            self.append(Status.INSERT_NL)
+            return True
+        if self.get_state() == Status.INSERT_VALUE:
+            for possibility in Status.INSERT_VALUE.value:
+                if possibility in self.actual_buffer:
+                    self.pop()
+                    self.append(Status.INSERT_STRING)
+        if self.get_state() == Status.INSERT_NL and re.search(
+            r'"([^"]+)"\s*:\s*"([^"]+)"\n', self.actual_buffer
+        ):
+            self.pop()
+            self.append(Status.INSERT_STRING)
+            self.actual_buffer = ""
+            return True
+        if self.get_state() == Status.INSERT_NL and re.search(
+            r'"([^"]+)"\s*:\s*"([^"]+)",', self.actual_buffer
+        ):
+            self.pop()
+            self.append(Status.INSERT_STRING)
+            self.actual_buffer = ""
+            return True
+        if self.get_state() == Status.INSERT_ONLY_NL:
+            self.pop()
+            self.append(Status.INSERT_STRING)
+            self.actual_buffer = ""
+            return True
+        if self.get_state() == Status.INSERT_STRING and re.search(
+            r'"$', self.actual_buffer
+        ):
+            # Check si y'a qu'un ". Ca doit etre mis a la fin pour que les autres check soient prio
+            self.pop()
+            self.append(Status.INSERT_KEY)
+            return True
+        return False
 
     def get_input_status(self, last_token: str, i: int = 0) -> bool:
         if re.search("{", last_token):
