@@ -26,21 +26,13 @@ class Status(enum.Enum):
 
 
 class JSONPredict:
-    def __init__(self, keys) -> None:
+    def __init__(self, keys, value) -> None:
         self.stack: list[Status] = [Status.START]
         self.actual_buffer = ""
         self.last_key = ""
         self.model = Small_LLM_Model()
         self.keys = keys
-        self.value = [
-            "fn_add_numbers",
-            "fn_greet",
-            "fn_reverse_string",
-            "fn_get_square_root",
-            "fn_substitute_string_with_regex",
-            "number",
-            "string",
-        ]
+        self.value = value
 
     def append(self, status: Status) -> None:
         self.stack.append(status)
@@ -69,9 +61,12 @@ class JSONPredict:
         if self.get_state() == Status.INSERT_KEY and re.search(
             r'"\w+$', self.actual_buffer
         ):
-            self.pop()
-            self.append(Status.INSERT_STRING)
-            self.last_key = last_token
+            for key in self.keys:
+                if key in self.actual_buffer:
+                    self.pop()
+                    self.append(Status.INSERT_STRING)
+                    self.last_key = key
+                    return True
             return True
         if self.get_state() == Status.INSERT_STRING and re.search(
             r'"([^"]+)"\s*:\s*"([^"]+)"$', self.actual_buffer
@@ -96,6 +91,7 @@ class JSONPredict:
             r'"([^"]+)"\s*:\s*"$', self.actual_buffer
         ):
             self.pop()
+            print("==>", self.last_key)
             self.keys.remove(self.last_key)
             if self.last_key == "description":
                 self.append(Status.FREE_TEXT)
