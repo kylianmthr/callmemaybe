@@ -44,14 +44,14 @@ def parse_json_object(
                     name=param, type=function["parameters"][param]["type"]
                 )
             )
-            functions_definition.append(
-                FunctionsDefinitionValidator(
-                    function_name=function["name"],
-                    description=function["description"],
-                    parameters=parameters,
-                    return_type=function["returns"]["type"],
-                )
+        functions_definition.append(
+            FunctionsDefinitionValidator(
+                function_name=function["name"],
+                description=function["description"],
+                parameters=parameters,
+                return_type=function["returns"]["type"],
             )
+        )
     return functions_definition
 
 

@@ -3,6 +3,9 @@ from typing import Any, Protocol, TypedDict
 from src.llm_sdk.llm_sdk import Small_LLM_Model
 import json
 
+from src.predict import JSONPredict
+from src.validator import ParametersValidator
+
 
 class Stage(Protocol):
     def process(self, data: Any, model: Small_LLM_Model) -> Any: ...
@@ -36,7 +39,6 @@ class LogitsStage:
     def process(
         self, data: EncodingDict, model: Small_LLM_Model
     ) -> LogitsDict:
-        print(data["encoded_prompt"])
         logits_dict: LogitsDict = {
             "logits": model.get_logits_from_input_ids(data["encoded_prompt"])
         }
@@ -58,6 +60,70 @@ class DecodeStage:
         return model.decode(
             data["logits"].index(max(data_with_allowed_logits))
         )
+
+
+class NameAndDescriptionStage:
+    def process(
+        self, prompt: str, model: Small_LLM_Model, functions_name: list[str]
+    ) -> str:
+        from src.generation import generate_response
+
+        sys_prompt = (
+            "You must generate a JSON response with this format:"
+            "{"
+            '"name": "function name",'
+            "}"
+            "So you have this keys:"
+            '"name" (function name, You can choose from these functions:'
+            f"{functions_name}"
+        )
+        predict = JSONPredict(
+            [
+                "name",
+            ],
+            functions_name,
+        )
+        res = generate_response(sys_prompt, prompt, predict, model)
+        return res
+
+
+class ParameterStage:
+    def process(
+        self,
+        prompt: str,
+        model: Small_LLM_Model,
+        function_name: str,
+        parameters: list[ParametersValidator],
+    ) -> str:
+        from src.generation import generate_response
+
+        parameters_dict = {
+            parameter.name: parameter.type for parameter in parameters
+        }
+        sys_prompt = (
+            f"You must generate a JSON response with this format: "
+            f'{{"parameter name": "what can match this parameter in the sentence", ...}}. '
+            f"Function: {function_name}. "
+            f"Parameters to type: {parameters_dict}. "
+            "CRITICAL: A Regex is a TEXTUAL pattern. Its data type is ALWAYS a 'string'. "
+            "If you see the word NUMBERS, it doesn't mean that you have to replace it with real number. NUMBERS is simply the word NUMBERS (in the regex context)"
+            "If you see the word asterisks, it mean '*'. "
+        )
+        allowed_regex = []
+        if function_name == "fn_substitute_string_with_regex":
+            allowed_regex = [r"\\d+", r"[aeiouAEIOU]", r"\\bcat\\b"]
+            sys_prompt += (
+                "You can choose between this regex: "
+                r"- \\d+ to replace numbers "
+                r"- [aeiouAEIOU] to replace vowels "
+                "- \\\\bcat\\\\b to replace the word cat.\n"
+            )
+        predict = JSONPredict(
+            list(parameters_dict.keys()), allowed_regex, True
+        )
+
+        res = generate_response(sys_prompt, prompt + ".\n", predict, model)
+        return res
 
 
 # class StepsManager

@@ -8,7 +8,6 @@ class Status(enum.Enum):
     START = ["{"]
     INSERT_KEY = [
         "name",
-        "description",
     ]
     INSERT_STRING = ['"']
     INSERT_SEMI_COLUMN = [":"]
@@ -26,13 +25,14 @@ class Status(enum.Enum):
 
 
 class JSONPredict:
-    def __init__(self, keys, value) -> None:
+    def __init__(self, keys, value, always_free_mode=False) -> None:
         self.stack: list[Status] = [Status.START]
         self.actual_buffer = ""
         self.last_key = ""
         self.model = Small_LLM_Model()
         self.keys = keys
         self.value = value
+        self.always_free_mode = always_free_mode
 
     def append(self, status: Status) -> None:
         self.stack.append(status)
@@ -91,9 +91,10 @@ class JSONPredict:
             r'"([^"]+)"\s*:\s*"$', self.actual_buffer
         ):
             self.pop()
-            print("==>", self.last_key)
             self.keys.remove(self.last_key)
-            if self.last_key == "description":
+            if (
+                self.last_key == "description" or self.always_free_mode
+            ) and self.last_key != "regex":
                 self.append(Status.FREE_TEXT)
                 return True
             self.append(Status.INSERT_VALUE)
