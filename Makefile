@@ -26,4 +26,8 @@ lint-strict:
 	uv run flake8 .
 	uv run mypy .
 
-.PHONY: install run debug clean lint lint-strict
+#TODO: A SUPPRIMER
+test:
+	uv run pytest
+
+.PHONY: install run debug clean lint lint-strict test

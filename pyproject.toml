@@ -13,3 +13,13 @@ dependencies = [
 
 [tool.uv.sources]
 llm-sdk = { path = "llm_sdk-0.1.0-py3-none-any.whl" }
+
+[tool.pytest.ini_options]
+# On dit à pytest d'ajouter le dossier src au PYTHONPATH automatiquement
+pythonpath = ["."]
+testpaths = ["tests"]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.0.2",
+]
