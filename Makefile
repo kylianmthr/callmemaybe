@@ -23,8 +23,8 @@ lint:
 	uv run mypy . --warn-return-any --warn-unused-ignores --ignore-missing-imports --disallow-untyped-defs --check-untyped-defs --exclude .venv
 
 lint-strict:
-	uv run flake8 .
-	uv run mypy .
+	uv run flake8 ${SRC}
+	uv run mypy ${SRC} --exclude "src/llm_sdk/" --follow-imports=silent
 
 #TODO: A SUPPRIMER
 test:

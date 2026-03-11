@@ -8,9 +8,15 @@ import pytest
     "prompt, expected_output",
     [
         (
-            'Replace all numbers in "Hello 34 I\'m 233 years old" with NUMBERS',
+            (
+                'Replace all numbers in "Hello 34 I\'m 233 years old" '
+                "with NUMBERS"
+            ),
             {
-                "prompt": 'Replace all numbers in "Hello 34 I\'m 233 years old" with NUMBERS',
+                "prompt": (
+                    'Replace all numbers in "Hello 34 I\'m 233 years old" with'
+                    "NUMBERS"
+                ),
                 "name": "fn_substitute_string_with_regex",
                 "parameters": {
                     "source_string": "Hello 34 I'm 233 years old",
@@ -22,7 +28,9 @@ import pytest
         (
             "Replace all vowels in 'Programming is fun' with asterisks",
             {
-                "prompt": "Replace all vowels in 'Programming is fun' with asterisks",
+                "prompt": (
+                    "Replace all vowels in 'Programming is fun' with asterisks"
+                ),
                 "name": "fn_substitute_string_with_regex",
                 "parameters": {
                     "source_string": "Programming is fun",
@@ -32,9 +40,15 @@ import pytest
             },
         ),
         (
-            "Substitute the word 'cat' with 'dog' in 'The cat sat on the mat with another cat'",
+            (
+                "Substitute the word 'cat' with 'dog' in 'The cat sat on the "
+                "mat with another cat'"
+            ),
             {
-                "prompt": "Substitute the word 'cat' with 'dog' in 'The cat sat on the mat with another cat'",
+                "prompt": (
+                    "Substitute the word 'cat' with 'dog' in 'The cat "
+                    "sat on the mat with another cat'"
+                ),
                 "name": "fn_substitute_string_with_regex",
                 "parameters": {
                     "source_string": "The cat sat on the mat with another cat",

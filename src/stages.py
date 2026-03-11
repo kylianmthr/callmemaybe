@@ -1,7 +1,6 @@
 import re
 from typing import Any, Protocol, TypedDict
 from src.llm_sdk.llm_sdk import Small_LLM_Model
-import json
 
 from src.predict import JSONPredict
 from src.validator import ParametersValidator
@@ -56,9 +55,9 @@ class DecodeStage:
         for token in allowed_logits:
             data_with_allowed_logits.append(data["logits"][token])
         if not (len(allowed_logits)):
-            return model.decode(data["logits"].index(max(data["logits"])))
+            return model.decode([data["logits"].index(max(data["logits"]))])
         return model.decode(
-            data["logits"].index(max(data_with_allowed_logits))
+            [data["logits"].index(max(data_with_allowed_logits))]
         )
 
 
@@ -102,25 +101,27 @@ class ParameterStage:
         }
         sys_prompt = (
             f"You must generate a JSON response with this format: "
-            f'{{"parameter name": "what can match this parameter in the sentence", ...}}. '
+            f'{{"parameter name": "what can match this parameter in the '
+            'sentence", ...}. '
             f"Function: {function_name}. "
             f"Parameters to type: {parameters_dict}. "
-            "CRITICAL: A Regex is a TEXTUAL pattern. Its data type is ALWAYS a 'string'. "
-            "If you see the word NUMBERS, it doesn't mean that you have to replace it with real number. NUMBERS is simply the word NUMBERS (in the regex context)"
+            "CRITICAL: A Regex is a TEXTUAL pattern. Its data type is ALWAYS a"
+            " 'string'. "
+            "If you see the word NUMBERS, it doesn't mean that you have to "
+            "replace it with real number. NUMBERS is simply the word NUMBERS "
+            "(in the regex context)"
             "If you see the word asterisks, it mean '*'. "
         )
-        allowed_regex = []
+        # allowed_regex = []
         if function_name == "fn_substitute_string_with_regex":
-            allowed_regex = [r"\\d+", r"[aeiouAEIOU]", r"\\bcat\\b"]
+            # allowed_regex = [r"\\d+", r"[aeiouAEIOU]", r"\\bcat\\b"]
             sys_prompt += (
                 "You can choose between this regex: "
                 r"- \\d+ to replace numbers "
                 r"- [aeiouAEIOU] to replace vowels "
                 "- \\\\bcat\\\\b to replace the word cat.\n"
             )
-        predict = JSONPredict(
-            list(parameters_dict.keys()), allowed_regex, True
-        )
+        predict = JSONPredict(list(parameters_dict.keys()), [], True)
 
         res = generate_response(sys_prompt, prompt + ".\n", predict, model)
         return res

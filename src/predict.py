@@ -92,9 +92,8 @@ class JSONPredict:
         ):
             self.pop()
             self.keys.remove(self.last_key)
-            if (
-                self.last_key == "description" or self.always_free_mode
-            ) and self.last_key != "regex":
+            if self.last_key == "description" or self.always_free_mode:
+                # and self.last_key != "regex":
                 self.append(Status.FREE_TEXT)
                 return True
             self.append(Status.INSERT_VALUE)
@@ -135,7 +134,6 @@ class JSONPredict:
         if self.get_state() == Status.INSERT_STRING and re.search(
             r'"$', self.actual_buffer
         ):
-            # Check si y'a qu'un ". Ca doit etre mis a la fin pour que les autres check soient prio
             self.pop()
             self.append(Status.INSERT_KEY)
             return True

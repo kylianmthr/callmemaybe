@@ -15,7 +15,6 @@ dependencies = [
 llm-sdk = { path = "llm_sdk-0.1.0-py3-none-any.whl" }
 
 [tool.pytest.ini_options]
-# On dit à pytest d'ajouter le dossier src au PYTHONPATH automatiquement
 pythonpath = ["."]
 testpaths = ["tests"]
 
@@ -23,3 +22,14 @@ testpaths = ["tests"]
 dev = [
     "pytest>=9.0.2",
 ]
+
+[tool.mypy]
+python_executable = ".venv/bin/python"
+exclude = [
+    "src/llm_sdk",
+]
+
+[[tool.mypy.overrides]]
+module = "llm_sdk.*"
+ignore_errors = true
+follow_imports = "silent"

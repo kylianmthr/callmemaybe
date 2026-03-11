@@ -1,5 +1,5 @@
-from typing import Annotated, Any, Callable, TypedDict
-from pydantic import AfterValidator, BaseModel, Field
+from typing import Any, Callable, TypedDict
+from pydantic import BaseModel, Field
 from src.functions import (
     fn_add_numbers,
     fn_get_square_root,
@@ -44,7 +44,8 @@ class ParametersValidator(BaseModel):
 
 
 class FunctionsDefinitionValidator(BaseModel):
-    # function_name: Annotated[str, AfterValidator(function_validation)] = Field(
+    # function_name: Annotated[str, AfterValidator(function_validation)] =
+    # Field(
     #    min_length=1
     # )
     function_name: str = Field(min_length=1)
