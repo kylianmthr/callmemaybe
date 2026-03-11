@@ -44,9 +44,10 @@ class ParametersValidator(BaseModel):
 
 
 class FunctionsDefinitionValidator(BaseModel):
-    function_name: Annotated[str, AfterValidator(function_validation)] = Field(
-        min_length=1
-    )
+    # function_name: Annotated[str, AfterValidator(function_validation)] = Field(
+    #    min_length=1
+    # )
+    function_name: str = Field(min_length=1)
     description: str = Field(min_length=1)
     parameters: list[
         ParametersValidator

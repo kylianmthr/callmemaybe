@@ -12,7 +12,7 @@ run: ${NAME}
 	uv run python -m ${SRC} ${FUNCTION_DEF_FILE} ${INPUT_FILE} ${OUTPUT_FILE}
 
 debug: ${NAME}
-	python3 -m pdb ${SRC} ${FUNCTION_DEF_FILE} ${INPUT_FILE} ${OUTPUT_FILE}
+	python3 -m pdb -m ${SRC} ${FUNCTION_DEF_FILE} ${INPUT_FILE} ${OUTPUT_FILE}
 
 clean:
 	find . -iname "__pycache__" -type d -exec rm -rf "{}" +
@@ -26,4 +26,8 @@ lint-strict:
 	uv run flake8 .
 	uv run mypy .
 
-.PHONY: install run debug clean lint lint-strict
+#TODO: A SUPPRIMER
+test:
+	uv run pytest
+
+.PHONY: install run debug clean lint lint-strict test
