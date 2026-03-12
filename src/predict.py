@@ -1,5 +1,6 @@
 import enum
 import re
+from typing import Any
 
 from src.llm_sdk.llm_sdk import Small_LLM_Model
 
@@ -48,7 +49,7 @@ class JSONPredict:
     def get_state(self) -> Status:
         return self.stack[-1]
 
-    def get_possible_characters(self) -> list[str] | None:
+    def get_possible_characters(self) -> list[str] | Any:
         if self.get_state() == Status.INSERT_KEY:
             return self.keys
         if self.get_state() == Status.INSERT_VALUE:

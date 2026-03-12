@@ -28,12 +28,16 @@ class LogitsDict(TypedDict):
 
 class EncodingStage:
     def process(self, data: str, model: Small_LLM_Model) -> EncodingDict:
-        encoded_dict: EncodingDict = {"encoded_prompt": model.encode(data).tolist()[0]}
+        encoded_dict: EncodingDict = {
+            "encoded_prompt": model.encode(data).tolist()[0]
+        }
         return encoded_dict
 
 
 class LogitsStage:
-    def process(self, data: EncodingDict, model: Small_LLM_Model) -> LogitsDict:
+    def process(
+        self, data: EncodingDict, model: Small_LLM_Model
+    ) -> LogitsDict:
         logits_dict: LogitsDict = {
             "logits": model.get_logits_from_input_ids(data["encoded_prompt"])
         }
@@ -49,7 +53,9 @@ class DecodeStage:
     ) -> str:
         if not (len(allowed_logits)):
             return model.decode([data["logits"].index(max(data["logits"]))])
-        best_token = max(allowed_logits, key=lambda token: data["logits"][token])
+        best_token = max(
+            allowed_logits, key=lambda token: data["logits"][token]
+        )
         return model.decode([best_token])
 
 
@@ -65,11 +71,13 @@ class NameAndDescriptionStage:
         functions_help = ""
         for func in functions:
             functions_help += (
-                f"- Name: {func.function_name}\n  Description: {func.description}\n"
+                f"- Name: {func.function_name}\n  "
+                "Description: {func.description}\n"
             )
 
         sys_prompt = (
-            "You are a function classifier. Your task is to select the ONLY correct function "
+            "You are a function classifier. "
+            "Your task is to select the ONLY correct function "
             "from the list below that matches the user's intent.\n\n"
             "### AVAILABLE FUNCTIONS:\n"
             f"{functions_help}\n"
@@ -77,7 +85,8 @@ class NameAndDescriptionStage:
             "1. Analyze the user prompt carefully.\n"
             "2. Compare it with the 'Description' of each function.\n"
             "3. Return ONLY the JSON with the exact function name.\n"
-            "4. If multiple functions seem similar, pick the most specific one for regex/substitution."
+            "4. If multiple functions seem similar, "
+            "pick the most specific one for regex/substitution."
         )
         predict = JSONPredict(
             [
@@ -101,13 +110,17 @@ class ParameterStage:
     ) -> str:
         from src.generation import generate_response
 
-        parameters_dict = {parameter.name: parameter.type for parameter in parameters}
+        parameters_dict = {
+            parameter.name: parameter.type for parameter in parameters
+        }
         sys_prompt = (
             f"You are a strict text extraction engine. "
             f"Function: {function_name}. Parameters: {parameters_dict}. \n"
             "--- MANDATORY RULES ---\n"
-            "1. COPY PASTE ONLY: Extract values EXACTLY as they appear. If lowercase, keep lowercase.\n"
-            "2. NO FORMATTING: Never use double asterisks (**). Use only '*' if needed.\n"
+            "1. COPY PASTE ONLY: Extract values EXACTLY as "
+            "they appear. If lowercase, keep lowercase.\n"
+            "2. NO FORMATTING: Never use double asterisks (**)."
+            " Use only '*' if needed.\n"
             "3. NO CORRECTIONS: Do not fix spelling or capitalization.\n\n"
             "--- EXAMPLES ---\n"
             "Prompt: 'replace the word cat'\n"

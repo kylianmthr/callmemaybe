@@ -43,7 +43,9 @@ def convert_parameters(
 ) -> list[dict]:
     for function in generated_functions:
         stored_func = [
-            func for func in functions if func.function_name == function["name"]
+            func
+            for func in functions
+            if func.function_name == function["name"]
         ][0]
         i = 0
         for parameter in function["parameters"]:
@@ -63,7 +65,9 @@ def convert_parameters(
     return generated_functions
 
 
-def generate_output_file(filename: str, generated_functions: list[dict]):
+def generate_output_file(
+    filename: str, generated_functions: list[dict]
+) -> None:
     with open(filename, "w") as f:
         json.dump(generated_functions, f, indent=4, ensure_ascii=False)
 
@@ -81,10 +85,14 @@ def main() -> None:
         functions = parsing.parse_json_object(
             parsing.file_to_functions_object(args.functions_definition)
         )
-        prompts = parsing.parse_prompts(parsing.file_to_prompts_object(args.input))
+        prompts = parsing.parse_prompts(
+            parsing.file_to_prompts_object(args.input)
+        )
         generated_functions = []
         for prompt in prompts:
-            generated_dictionnary = answer_prompt(llm, prompt.content, functions)
+            generated_dictionnary = answer_prompt(
+                llm, prompt.content, functions
+            )
             generated_functions.append(generated_dictionnary)
             print(generated_dictionnary)
         # for func in functions:
