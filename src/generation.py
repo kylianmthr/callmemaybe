@@ -29,7 +29,6 @@ def generate_response(
                 predict.actual_buffer.split(":")[-1] + word,
             )
         ):
-            print(word)
             word = word[: word.find('"') + 1]
         sentence += word
         predict.manage_state(word)
