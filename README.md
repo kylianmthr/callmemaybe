@@ -1,4 +1,5 @@
 *This project has been created as part of the 42 curriculum by kmathuri.* 
+
 [![Python Version](https://img.shields.io/badge/python-3.10%2B-blue)](https://www.python.org/)
 [![Code Style](https://img.shields.io/badge/code%20style-flake8-green)](https://flake8.pycqa.org/)
 [![Type Checking](https://img.shields.io/badge/type%20checking-mypy-lightgrey)](http://mypy-lang.org/)
