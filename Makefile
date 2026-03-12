@@ -1,6 +1,7 @@
 SRC=src
+#FUNCTION_DEF_FILE=${SRC}/data/input/temp.json
+#INPUT_FILE=${SRC}/data/input/temp2.json
 FUNCTION_DEF_FILE=${SRC}/data/input/functions_definition.json
-#INPUT_FILE=${SRC}/data/input/temp.json
 INPUT_FILE=${SRC}/data/input/function_calling_tests.json
 OUTPUT_FILE=output.json
 
@@ -12,8 +13,8 @@ install:
 run: ${NAME}
 	uv run python -m ${SRC} --functions_definition ${FUNCTION_DEF_FILE} --input ${INPUT_FILE} --output ${OUTPUT_FILE}
 
-debug: ${NAME}
-	python3 -m pdb -m ${SRC} ${FUNCTION_DEF_FILE} ${INPUT_FILE} ${OUTPUT_FILE}
+debug:
+	uv run python -m pdb -m ${SRC} --functions_definition ${FUNCTION_DEF_FILE} --input ${INPUT_FILE} --output ${OUTPUT_FILE}
 
 clean:
 	find . -iname "__pycache__" -type d -exec rm -rf "{}" +
