@@ -25,11 +25,16 @@ class Status(enum.Enum):
 
 
 class JSONPredict:
-    def __init__(self, keys, value, always_free_mode=False) -> None:
+    def __init__(
+        self,
+        keys: list[str],
+        value: list[str],
+        model: Small_LLM_Model,
+        always_free_mode: bool = False,
+    ) -> None:
         self.stack: list[Status] = [Status.START]
         self.actual_buffer = ""
         self.last_key = ""
-        self.model = Small_LLM_Model()
         self.keys = keys
         self.value = value
         self.always_free_mode = always_free_mode
