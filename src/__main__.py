@@ -33,9 +33,33 @@ def answer_prompt(
             if function.function_name == generated_dictionnary["name"]
         ][0],
     )
-    print("==>", res)
     generated_dictionnary["parameters"] = json.loads(res)
     return generated_dictionnary
+
+
+def convert_parameters(
+    functions: list[FunctionsDefinitionValidator],
+    generated_functions: list[dict],
+) -> list[dict]:
+    for function in generated_functions:
+        stored_func = [
+            func
+            for func in functions
+            if func.function_name == function["name"]
+        ][0]
+        i = 0
+        for parameter in function["parameters"]:
+            if stored_func.parameters[i].type == "number":
+                function["parameters"][parameter] = int(
+                    function["parameters"][parameter]
+                )
+            i += 1
+    return generated_functions
+
+
+def generate_output_file(filename: str, generated_functions: list[dict]):
+    with open(filename, "w") as f:
+        json.dump(generated_functions, f, indent=4, ensure_ascii=False)
 
 
 def main(argv: list[str]) -> None:
@@ -47,18 +71,17 @@ def main(argv: list[str]) -> None:
         prompts = parsing.parse_prompts(
             parsing.file_to_prompts_object(argv[2])
         )
-        # for prompt in prompts:
-        #    generated_dictionnary = answer_prompt(
-        #        llm, prompt.content, functions
-        #    )
-        generated_dictionnary = answer_prompt(
-            llm, prompts[8].content, functions
-        )
+        generated_functions = []
+        for prompt in prompts:
+            generated_dictionnary = answer_prompt(
+                llm, prompt.content, functions
+            )
+            generated_functions.append(generated_dictionnary)
         # for func in functions:
         #    allowed_logits += llm.encode(func).tolist()[0]
         # print(allowed_logits)
-        print("==== Final res ====")
-        print(generated_dictionnary)
+        print(convert_parameters(functions, generated_functions))
+        generate_output_file(argv[3], generated_functions)
     except (
         FileNotFoundError,
         ValueError,

@@ -33,6 +33,5 @@ def generate_response(
         ):
             word = word[: word.find('"') + 1]
         sentence += word
-        print(sentence)
         predict.manage_state(word)
     return sentence.replace(initial_prompt, "")

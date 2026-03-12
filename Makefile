@@ -1,5 +1,6 @@
 SRC=src
 FUNCTION_DEF_FILE=${SRC}/data/input/functions_definition.json
+#INPUT_FILE=${SRC}/data/input/temp.json
 INPUT_FILE=${SRC}/data/input/function_calling_tests.json
 OUTPUT_FILE=output.json
 
@@ -28,6 +29,6 @@ lint-strict:
 
 #TODO: A SUPPRIMER
 test:
-	uv run pytest
+	uv run pytest -vv
 
 .PHONY: install run debug clean lint lint-strict test

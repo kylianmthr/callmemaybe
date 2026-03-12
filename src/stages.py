@@ -81,6 +81,7 @@ class NameAndDescriptionStage:
                 "name",
             ],
             functions_name,
+            model,
         )
         res = generate_response(sys_prompt, prompt, predict, model)
         return res
@@ -121,7 +122,7 @@ class ParameterStage:
                 r"- [aeiouAEIOU] to replace vowels "
                 "- \\\\bcat\\\\b to replace the word cat.\n"
             )
-        predict = JSONPredict(list(parameters_dict.keys()), [], True)
+        predict = JSONPredict(list(parameters_dict.keys()), [], model, True)
 
         res = generate_response(sys_prompt, prompt + ".\n", predict, model)
         return res
