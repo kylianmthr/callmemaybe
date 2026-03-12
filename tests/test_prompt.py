@@ -8,14 +8,10 @@ import pytest
     "prompt, expected_output",
     [
         (
-            (
-                'Replace all numbers in "Hello 34 I\'m 233 years old" '
-                "with NUMBERS"
-            ),
+            ('Replace all numbers in "Hello 34 I\'m 233 years old" with NUMBERS'),
             {
                 "prompt": (
-                    'Replace all numbers in "Hello 34 I\'m 233 years old" with'
-                    "NUMBERS"
+                    'Replace all numbers in "Hello 34 I\'m 233 years old" with NUMBERS'
                 ),
                 "name": "fn_substitute_string_with_regex",
                 "parameters": {
@@ -28,9 +24,7 @@ import pytest
         (
             "Replace all vowels in 'Programming is fun' with asterisks",
             {
-                "prompt": (
-                    "Replace all vowels in 'Programming is fun' with asterisks"
-                ),
+                "prompt": ("Replace all vowels in 'Programming is fun' with asterisks"),
                 "name": "fn_substitute_string_with_regex",
                 "parameters": {
                     "source_string": "Programming is fun",
@@ -144,9 +138,7 @@ import pytest
 def test_regex_prompt(prompt: str, expected_output: dict):
     llm = llm_sdk.Small_LLM_Model()
     functions = parsing.parse_json_object(
-        parsing.file_to_functions_object(
-            "src/data/input/functions_definition.json"
-        )
+        parsing.file_to_functions_object("src/data/input/functions_definition.json")
     )
     generated_dictionnary = answer_prompt(llm, prompt, functions)
     assert generated_dictionnary == expected_output
