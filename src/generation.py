@@ -16,9 +16,7 @@ def generate_response(
         if not (len(predict.stack)):
             break
         allowed_logits = []
-        logits = LogitsStage().process(
-            EncodingStage().process(sentence, model), model
-        )
+        logits = LogitsStage().process(EncodingStage().process(sentence, model), model)
         possible_char = predict.get_possible_characters()
         if len(predict.stack):
             if possible_char:
@@ -31,6 +29,7 @@ def generate_response(
                 predict.actual_buffer.split(":")[-1] + word,
             )
         ):
+            print(word)
             word = word[: word.find('"') + 1]
         sentence += word
         predict.manage_state(word)

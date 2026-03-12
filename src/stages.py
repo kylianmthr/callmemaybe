@@ -3,7 +3,7 @@ from typing import Any, Protocol, TypedDict
 from src.llm_sdk.llm_sdk import Small_LLM_Model
 
 from src.predict import JSONPredict
-from src.validator import ParametersValidator
+from src.validator import FunctionsDefinitionValidator, ParametersValidator
 
 
 class Stage(Protocol):
@@ -28,16 +28,12 @@ class LogitsDict(TypedDict):
 
 class EncodingStage:
     def process(self, data: str, model: Small_LLM_Model) -> EncodingDict:
-        encoded_dict: EncodingDict = {
-            "encoded_prompt": model.encode(data).tolist()[0]
-        }
+        encoded_dict: EncodingDict = {"encoded_prompt": model.encode(data).tolist()[0]}
         return encoded_dict
 
 
 class LogitsStage:
-    def process(
-        self, data: EncodingDict, model: Small_LLM_Model
-    ) -> LogitsDict:
+    def process(self, data: EncodingDict, model: Small_LLM_Model) -> LogitsDict:
         logits_dict: LogitsDict = {
             "logits": model.get_logits_from_input_ids(data["encoded_prompt"])
         }
@@ -51,36 +47,43 @@ class DecodeStage:
         model: Small_LLM_Model,
         allowed_logits: list[int],
     ) -> str:
-        data_with_allowed_logits = []
-        for token in allowed_logits:
-            data_with_allowed_logits.append(data["logits"][token])
         if not (len(allowed_logits)):
             return model.decode([data["logits"].index(max(data["logits"]))])
-        return model.decode(
-            [data["logits"].index(max(data_with_allowed_logits))]
-        )
+        best_token = max(allowed_logits, key=lambda token: data["logits"][token])
+        return model.decode([best_token])
 
 
 class NameAndDescriptionStage:
     def process(
-        self, prompt: str, model: Small_LLM_Model, functions_name: list[str]
+        self,
+        prompt: str,
+        model: Small_LLM_Model,
+        functions: list[FunctionsDefinitionValidator],
     ) -> str:
         from src.generation import generate_response
 
+        functions_help = ""
+        for func in functions:
+            functions_help += (
+                f"- Name: {func.function_name}\n  Description: {func.description}\n"
+            )
+
         sys_prompt = (
-            "You must generate a JSON response with this format:"
-            "{"
-            '"name": "function name",'
-            "}"
-            "So you have this keys:"
-            '"name" (function name, You can choose from these functions:'
-            f"{functions_name}"
+            "You are a function classifier. Your task is to select the ONLY correct function "
+            "from the list below that matches the user's intent.\n\n"
+            "### AVAILABLE FUNCTIONS:\n"
+            f"{functions_help}\n"
+            "--- RULES ---\n"
+            "1. Analyze the user prompt carefully.\n"
+            "2. Compare it with the 'Description' of each function.\n"
+            "3. Return ONLY the JSON with the exact function name.\n"
+            "4. If multiple functions seem similar, pick the most specific one for regex/substitution."
         )
         predict = JSONPredict(
             [
                 "name",
             ],
-            functions_name,
+            [func.function_name for func in functions],
             model,
         )
         res = generate_response(sys_prompt, prompt, predict, model)
@@ -93,25 +96,27 @@ class ParameterStage:
         prompt: str,
         model: Small_LLM_Model,
         function_name: str,
+        description: str,
         parameters: list[ParametersValidator],
     ) -> str:
         from src.generation import generate_response
 
-        parameters_dict = {
-            parameter.name: parameter.type for parameter in parameters
-        }
+        parameters_dict = {parameter.name: parameter.type for parameter in parameters}
         sys_prompt = (
-            f"You must generate a JSON response with this format: "
-            f'{{"parameter name": "what can match this parameter in the '
-            'sentence", ...}. '
-            f"Function: {function_name}. "
-            f"Parameters to type: {parameters_dict}. "
-            "CRITICAL: A Regex is a TEXTUAL pattern. Its data type is ALWAYS a"
-            " 'string'. "
-            "If you see the word NUMBERS, it doesn't mean that you have to "
-            "replace it with real number. NUMBERS is simply the word NUMBERS "
-            "(in the regex context)"
-            "If you see the word asterisks, it mean '*'. "
+            f"You are a strict text extraction engine. "
+            f"Function: {function_name}. Parameters: {parameters_dict}. \n"
+            "--- MANDATORY RULES ---\n"
+            "1. COPY PASTE ONLY: Extract values EXACTLY as they appear. If lowercase, keep lowercase.\n"
+            "2. NO FORMATTING: Never use double asterisks (**). Use only '*' if needed.\n"
+            "3. NO CORRECTIONS: Do not fix spelling or capitalization.\n\n"
+            "--- EXAMPLES ---\n"
+            "Prompt: 'replace the word cat'\n"
+            'JSON: {"regex": "\\\\bcat\\\\b"}\n'
+            "Prompt: 'invite alex to the party'\n"
+            'JSON: {"name": "alex"}\n'
+            "Prompt: 'use an asterisk here'\n"
+            'JSON: {"symbol": "*"}\n'
+            "--- END OF EXAMPLES ---\n"
         )
         # allowed_regex = []
         if function_name == "fn_substitute_string_with_regex":
@@ -124,7 +129,7 @@ class ParameterStage:
             )
         predict = JSONPredict(list(parameters_dict.keys()), [], model, True)
 
-        res = generate_response(sys_prompt, prompt + ".\n", predict, model)
+        res = generate_response(sys_prompt, prompt + "\n", predict, model)
         return res
 
 
