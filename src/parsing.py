@@ -7,6 +7,31 @@ from src.validator import (
     PromptValidator,
     PromptsDict,
 )
+import argparse
+
+
+def parse_arguments() -> argparse.Namespace:
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--functions_definition",
+        type=str,
+        help=(
+            "The file containing the definitions of the functions that will "
+            "be used to respond to your prompts."
+        ),
+    )
+    parser.add_argument(
+        "--input", type=str, help="The file containing your prompts."
+    )
+    parser.add_argument(
+        "--output",
+        type=str,
+        help=(
+            "The file that will be generated and will contain the "
+            "function call."
+        ),
+    )
+    return parser.parse_args()
 
 
 def file_to_functions_object(

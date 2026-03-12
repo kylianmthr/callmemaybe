@@ -64,12 +64,19 @@ def generate_output_file(filename: str, generated_functions: list[dict]):
 
 def main(argv: list[str]) -> None:
     try:
+        args = parsing.parse_arguments()
+        if not (args.functions_definition):
+            args.functions_definition = "src/data/functions_definition.json"
+        if not (args.input):
+            args.input = "src/data/function_calling_tests.json"
+        if not (args.output):
+            args.output = "src/data/output/output.json"
         llm = llm_sdk.Small_LLM_Model()
         functions = parsing.parse_json_object(
-            parsing.file_to_functions_object(argv[1])
+            parsing.file_to_functions_object(args.functions_definition)
         )
         prompts = parsing.parse_prompts(
-            parsing.file_to_prompts_object(argv[2])
+            parsing.file_to_prompts_object(args.input)
         )
         generated_functions = []
         for prompt in prompts:
@@ -81,7 +88,7 @@ def main(argv: list[str]) -> None:
         #    allowed_logits += llm.encode(func).tolist()[0]
         # print(allowed_logits)
         print(convert_parameters(functions, generated_functions))
-        generate_output_file(argv[3], generated_functions)
+        generate_output_file(args.output, generated_functions)
     except (
         FileNotFoundError,
         ValueError,

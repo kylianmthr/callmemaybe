@@ -10,7 +10,7 @@ install:
 	uv sync
 
 run: ${NAME}
-	uv run python -m ${SRC} ${FUNCTION_DEF_FILE} ${INPUT_FILE} ${OUTPUT_FILE}
+	uv run python -m ${SRC} --functions_definition ${FUNCTION_DEF_FILE} --input ${INPUT_FILE} --output ${OUTPUT_FILE}
 
 debug: ${NAME}
 	python3 -m pdb -m ${SRC} ${FUNCTION_DEF_FILE} ${INPUT_FILE} ${OUTPUT_FILE}
