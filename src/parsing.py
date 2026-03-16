@@ -69,6 +69,11 @@ def parse_json_object(
                     name=param, type=function["parameters"][param]["type"]
                 )
             )
+        for param in function:
+            if param not in ["name", "description", "returns", "type"]:
+                raise ValueError(
+                    "Unexpected format, found unexpected key:", param
+                )
         functions_definition.append(
             FunctionsDefinitionValidator(
                 function_name=function["name"],
@@ -85,5 +90,11 @@ def parse_prompts(
 ) -> list[PromptValidator]:
     prompts: list[PromptValidator] = []
     for prompt in json_object:
-        prompts.append(PromptValidator(content=prompt["prompt"]))
+        for value in prompt:
+            if value == "prompt":
+                prompts.append(PromptValidator(content=prompt[value]))
+            else:
+                raise ValueError(
+                    "Unexpected format, found unexpected key:", value
+                )
     return prompts

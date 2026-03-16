@@ -66,38 +66,65 @@ def main(argv: list[str]) -> None:
     try:
         args = parsing.parse_arguments()
         if not (args.functions_definition):
-            args.functions_definition = "src/data/functions_definition.json"
+            args.functions_definition = (
+                "src/data/input/functions_definition.json"
+            )
         if not (args.input):
-            args.input = "src/data/function_calling_tests.json"
+            args.input = "src/data/input/function_calling_tests.json"
         if not (args.output):
             args.output = "src/data/output/output.json"
         llm = llm_sdk.Small_LLM_Model()
-        functions = parsing.parse_json_object(
-            parsing.file_to_functions_object(args.functions_definition)
-        )
-        prompts = parsing.parse_prompts(
-            parsing.file_to_prompts_object(args.input)
-        )
-        generated_functions = []
-        for prompt in prompts:
-            generated_dictionnary = answer_prompt(
-                llm, prompt.content, functions
+        try:
+            functions = parsing.parse_json_object(
+                parsing.file_to_functions_object(args.functions_definition)
             )
-            generated_functions.append(generated_dictionnary)
-        # for func in functions:
-        #    allowed_logits += llm.encode(func).tolist()[0]
-        # print(allowed_logits)
-        print(convert_parameters(functions, generated_functions))
-        generate_output_file(args.output, generated_functions)
+            if not len(functions):
+                raise ValueError("Functions definition file can't be empty")
+            try:
+                prompts = parsing.parse_prompts(
+                    parsing.file_to_prompts_object(args.input)
+                )
+                if not len(prompts):
+                    raise ValueError("Prompt file can't be empty")
+                try:
+                    generated_functions = []
+                    for prompt in prompts:
+                        generated_dictionnary = answer_prompt(
+                            llm, prompt.content, functions
+                        )
+                        generated_functions.append(generated_dictionnary)
+                    # for func in functions:
+                    #    allowed_logits += llm.encode(func).tolist()[0]
+                    # print(allowed_logits)
+                    generate_output_file(args.output, generated_functions)
+                except Exception as e:
+                    print("Error", e)
+            except (FileNotFoundError, PermissionError):
+                print("Error: Can't open the prompts file.")
+            except (json.JSONDecodeError, KeyError):
+                print("Error: JSON malformed. (Prompt file)")
+            except ValidationError as e:
+                print(e.errors()[0]["msg"])
+            except Exception as e:
+                print("Error:", e)
+        except (FileNotFoundError, PermissionError):
+            print("Error: Can't open the functions definition file.")
+        except (json.JSONDecodeError, KeyError):
+            print("Error: JSON malformed. (Functions definition file)")
+        except ValidationError as e:
+            print(e.errors()[0]["msg"])
+        except Exception as e:
+            print("Error:", e)
     except (
         FileNotFoundError,
         ValueError,
         PermissionError,
         ValidationError,
-        KeyError,
     ) as e:
         print(type(e), e)
         exit()
+    except Exception as e:
+        print("Error while parsing arguments:", e)
 
 
 if __name__ == "__main__":
