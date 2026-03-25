@@ -10,6 +10,29 @@ def generate_response(
     predict: JSONPredict,
     model: llm_sdk.Small_LLM_Model,
 ) -> str:
+    """
+    Generates a response string by iteratively predicting and appending tokens
+    using a language model and prediction state.
+
+    Args:
+        sys_prompt (str): The system prompt to prepend to the user prompt.
+        prompt (str): The user prompt to generate a response for.
+        predict (JSONPredict): An object managing the prediction state and
+            possible next characters.
+        model (llm_sdk.Small_LLM_Model): The language model used for
+            encoding and decoding tokens.
+
+    Returns:
+        str: The generated response string, excluding the initial prompt.
+
+    Notes:
+        - The function continues generating tokens until the prediction
+            stack is empty.
+        - Only allowed tokens, as determined by the prediction state, are
+            considered at each step.
+        - Special handling is applied when the prediction state is
+            Status.FREE_TEXT and a specific pattern is matched in the buffer.
+    """
     initial_prompt = sys_prompt + prompt
     sentence = initial_prompt
     while True:

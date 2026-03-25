@@ -6,6 +6,27 @@ from src.llm_sdk.llm_sdk import Small_LLM_Model
 
 
 class Status(enum.Enum):
+    """
+    An enumeration representing the various states in a parsing or prediction
+    process.
+
+    Attributes:
+        START (list): Indicates the start of a structure, represented by "{".
+        INSERT_KEY (list): Represents the state where a key (e.g., "name") is
+            to be inserted.
+        INSERT_STRING (list): Represents the state where a string delimiter
+            ('"') is to be inserted.
+        INSERT_SEMI_COLUMN (list): Represents the state where a colon (":") is
+            to be inserted.
+        INSERT_VALUE (list): Represents the state where a value
+            (function name) is to be inserted.
+        INSERT_NL (list): Represents the state where a newline or comma (",")
+            is to be inserted.
+        INSERT_ONLY_NL (list): Represents the state where only a newline or
+            comma (",") is to be inserted.
+        END (list): Indicates the end of a structure, represented by "}".
+        FREE_TEXT (None): Represents a state where free text is allowed.
+    """
     START = ["{"]
     INSERT_KEY = [
         "name",
@@ -26,6 +47,23 @@ class Status(enum.Enum):
 
 
 class JSONPredict:
+    """
+    JSONPredict is a state machine for generating or parsing JSON-like
+    structures in a controlled, stepwise manner.
+
+    Attributes:
+        keys (list[str]): List of possible keys to insert into the JSON
+            object.
+        value (list[str]): List of possible values to insert for a key.
+        model (Small_LLM_Model): The language model used for prediction or
+            generation.
+        always_free_mode (bool): If True, allows free text entry for all keys.
+        stack (list[Status]): Stack representing the current state of the JSON
+            generation process.
+        actual_buffer (str): Buffer holding the current string being
+            processed.
+        last_key (str): The last key that was inserted or processed.
+    """
     def __init__(
         self,
         keys: list[str],
@@ -41,15 +79,48 @@ class JSONPredict:
         self.always_free_mode = always_free_mode
 
     def append(self, status: Status) -> None:
+        """
+        Appends a Status object to the stack.
+
+        Args:
+            status (Status): The status object to be added to the stack.
+        """
         self.stack.append(status)
 
     def pop(self) -> Status:
+        """
+        Removes and returns the top element from the stack.
+
+        Returns:
+            Status: The top element that was removed from the stack.
+
+        Raises:
+            IndexError: If the stack is empty.
+        """
         return self.stack.pop()
 
     def get_state(self) -> Status:
+        """
+        Returns the current state from the top of the stack.
+
+        Returns:
+            Status: The most recent status object from the stack.
+        """
         return self.stack[-1]
 
     def get_possible_characters(self) -> list[str] | Any:
+        """
+        Returns a list of possible characters based on the current state.
+
+        Depending on the current state of the object, this method returns:
+        - The list of keys if the state is `Status.INSERT_KEY`.
+        - The value if the state is `Status.INSERT_VALUE`.
+        - Otherwise, returns the value associated with the current state.
+
+        Returns:
+            list[str] | Any: The possible characters or values based on the
+                current state.
+        """
         if self.get_state() == Status.INSERT_KEY:
             return self.keys
         if self.get_state() == Status.INSERT_VALUE:
@@ -58,6 +129,24 @@ class JSONPredict:
             return self.get_state().value
 
     def manage_state(self, last_token: str) -> bool:
+        """
+        Manages and updates the internal state machine based on the latest
+        input token.
+
+        This method processes the `last_token` character, updates the
+        `actual_buffer`, and transitions between different states defined by
+        the `Status` enum. It uses regular expressions to match specific
+        patterns in the buffer and determines the next state accordingly.
+        The method also manages the list of keys and values, and handles
+        transitions for inserting keys, strings, values, newlines, and ending
+        the process.
+
+        Args:
+            last_token (str): The latest character or token to process.
+
+        Returns:
+            bool: True if a state transition occurred, False otherwise.
+        """
         self.actual_buffer += last_token
         if self.get_state() == Status.START:
             self.pop()
