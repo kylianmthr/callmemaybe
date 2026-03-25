@@ -1,5 +1,5 @@
 from src import parsing
-from src.__main__ import convert_parameters, generate_output_file
+from src.__main__ import convert_parameters
 
 
 def test_output():
