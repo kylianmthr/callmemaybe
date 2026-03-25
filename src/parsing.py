@@ -137,7 +137,13 @@ def parse_json_object(
                 )
             )
         for param in function:
-            if param not in ["name", "description", "returns", "type"]:
+            if param not in [
+                "name",
+                "description",
+                "returns",
+                "type",
+                "parameters",
+            ]:
                 raise ValueError(
                     "Unexpected format, found unexpected key:", param
                 )

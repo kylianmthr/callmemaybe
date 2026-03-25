@@ -3,7 +3,7 @@ SRC=src
 #INPUT_FILE=${SRC}/data/input/temp2.json
 FUNCTION_DEF_FILE=${SRC}/data/input/functions_definition.json
 INPUT_FILE=${SRC}/data/input/function_calling_tests.json
-OUTPUT_FILE=${SRC}/data/output.json
+OUTPUT_FILE=${SRC}/data/ouput/output.json
 
 all: ${NAME}
 
