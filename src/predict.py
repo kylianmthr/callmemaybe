@@ -2,7 +2,7 @@ import enum
 import re
 from typing import Any
 
-from src.llm_sdk.llm_sdk import Small_LLM_Model
+from llm_sdk.llm_sdk import Small_LLM_Model
 
 
 class Status(enum.Enum):
@@ -27,6 +27,7 @@ class Status(enum.Enum):
         END (list): Indicates the end of a structure, represented by "}".
         FREE_TEXT (None): Represents a state where free text is allowed.
     """
+
     START = ["{"]
     INSERT_KEY = [
         "name",
@@ -64,6 +65,7 @@ class JSONPredict:
             processed.
         last_key (str): The last key that was inserted or processed.
     """
+
     def __init__(
         self,
         keys: list[str],

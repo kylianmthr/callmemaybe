@@ -1,7 +1,7 @@
 from typing import Any
 from pydantic import ValidationError
 from src import parsing
-from src.llm_sdk import llm_sdk
+from llm_sdk import llm_sdk
 from src.stages import (
     NameAndDescriptionStage,
     ParameterStage,
@@ -110,6 +110,10 @@ def convert_parameters(
         for parameter in function["parameters"]:
             if stored_func.parameters[i].type == "number":
                 function["parameters"][parameter] = float(
+                    function["parameters"][parameter]
+                )
+            if stored_func.parameters[i].type == "integer":
+                function["parameters"][parameter] = int(
                     function["parameters"][parameter]
                 )
             if (

@@ -1,5 +1,5 @@
 import re
-from src.llm_sdk import llm_sdk
+from llm_sdk import llm_sdk
 from src.predict import JSONPredict, Status
 from src.stages import DecodeStage, EncodingStage, LogitsStage
 

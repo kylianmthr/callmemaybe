@@ -6,13 +6,14 @@ readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
     "flake8>=7.3.0",
-    "llm-sdk",
+    "huggingface-hub>=1.7.2",
     "mypy>=1.19.1",
+    "numpy>=2.2.6",
     "pydantic>=2.12.5",
+	"torch>=2.0.0",
+    "regex>=2026.2.28",
+    "transformers>=5.3.0",
 ]
-
-[tool.uv.sources]
-llm-sdk = { path = "llm_sdk-0.1.0-py3-none-any.whl" }
 
 [tool.pytest.ini_options]
 pythonpath = ["."]
@@ -26,7 +27,7 @@ dev = [
 [tool.mypy]
 python_executable = ".venv/bin/python"
 exclude = [
-    "src/llm_sdk",
+    "llm_sdk",
 ]
 
 [[tool.mypy.overrides]]
