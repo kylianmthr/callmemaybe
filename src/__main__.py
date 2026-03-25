@@ -108,6 +108,7 @@ def convert_parameters(
         ][0]
         i = 0
         for parameter in function["parameters"]:
+            print(parameter)
             if stored_func.parameters[i].type == "number":
                 function["parameters"][parameter] = float(
                     function["parameters"][parameter]
@@ -196,7 +197,10 @@ def main(argv: list[str]) -> None:
                     # for func in functions:
                     #    allowed_logits += llm.encode(func).tolist()[0]
                     # print(allowed_logits)
-                    generate_output_file(args.output, generated_functions)
+                    generate_output_file(
+                        args.output,
+                        convert_parameters(functions, generated_functions),
+                    )
                 except Exception as e:
                     print("Error", e)
             except (FileNotFoundError, PermissionError):
