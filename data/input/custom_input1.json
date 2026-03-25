@@ -1,0 +1,6 @@
+[
+	
+	{
+		"prompt": "Génère une requête SQL PostgreSQL qui sélectionne la colonne \"SELECT\" de la table \"TABLE\" où la colonne \"FROM\" est une date supérieure à '2024-01-01' et la colonne \"NUMBERS\" est égale à la chaîne de caractères 'NUMBERS', en utilisant impérativement des doubles quotes pour tous les noms d'objets."
+	}
+]
