@@ -108,7 +108,6 @@ def convert_parameters(
         ][0]
         i = 0
         for parameter in function["parameters"]:
-            print(parameter)
             if stored_func.parameters[i].type == "number":
                 function["parameters"][parameter] = float(
                     function["parameters"][parameter]
