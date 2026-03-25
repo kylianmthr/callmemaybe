@@ -1,3 +1,4 @@
+from typing import Any
 from pydantic import ValidationError
 from src import parsing
 from src.llm_sdk import llm_sdk
@@ -14,7 +15,7 @@ def answer_prompt(
     model: llm_sdk.Small_LLM_Model,
     prompt: str,
     functions: list[FunctionsDefinitionValidator],
-) -> dict:
+) -> dict[str, str]:
     generated_dictionnary = {"prompt": prompt}
     res = NameAndDescriptionStage().process(prompt, model, functions)
     generated_dictionnary.update(json.loads(res))
@@ -39,8 +40,8 @@ def answer_prompt(
 
 def convert_parameters(
     functions: list[FunctionsDefinitionValidator],
-    generated_functions: list[dict],
-) -> list[dict]:
+    generated_functions: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
     for function in generated_functions:
         stored_func = [
             func
@@ -66,7 +67,7 @@ def convert_parameters(
 
 
 def generate_output_file(
-    filename: str, generated_functions: list[dict]
+    filename: str, generated_functions: list[dict[str, Any]]
 ) -> None:
     with open(filename, "w") as f:
         json.dump(generated_functions, f, indent=4, ensure_ascii=False)

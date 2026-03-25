@@ -3,7 +3,7 @@ SRC=src
 #INPUT_FILE=${SRC}/data/input/temp2.json
 FUNCTION_DEF_FILE=${SRC}/data/input/functions_definition.json
 INPUT_FILE=${SRC}/data/input/function_calling_tests.json
-OUTPUT_FILE=output.json
+OUTPUT_FILE=${SRC}/data/output.json
 
 all: ${NAME}
 
@@ -26,7 +26,7 @@ lint:
 
 lint-strict:
 	uv run flake8 ${SRC}
-	uv run mypy ${SRC} --exclude "src/llm_sdk/" --follow-imports=silent
+	uv run mypy ${SRC} --strict --exclude "src/llm_sdk/" --follow-imports=silent
 
 #TODO: A SUPPRIMER
 test:
