@@ -166,13 +166,11 @@ def main(argv: list[str]) -> None:
     try:
         args = parsing.parse_arguments()
         if not (args.functions_definition):
-            args.functions_definition = (
-                "src/data/input/functions_definition.json"
-            )
+            args.functions_definition = "data/input/functions_definition.json"
         if not (args.input):
-            args.input = "src/data/input/function_calling_tests.json"
+            args.input = "data/input/function_calling_tests.json"
         if not (args.output):
-            args.output = "src/data/output/output.json"
+            args.output = "data/output/function_calling_result.json"
         llm = llm_sdk.Small_LLM_Model()
         try:
             functions = parsing.parse_json_object(
