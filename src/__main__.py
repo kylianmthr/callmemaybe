@@ -166,7 +166,7 @@ def main(argv: list[str]) -> None:
     try:
         args = parsing.parse_arguments()
         if not (args.functions_definition):
-            args.functions_definition = "data/input/functions_definition.json"
+            args.functions_definition = "data/input/function_definitions.json"
         if not (args.input):
             args.input = "data/input/function_calling_tests.json"
         if not (args.output):
