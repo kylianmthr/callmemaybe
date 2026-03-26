@@ -196,7 +196,7 @@ class JSONPredict:
             self.append(Status.INSERT_VALUE)
             return True
         if (self.get_state() == Status.FREE_TEXT) and re.search(
-            r'"([^"]+)"\s*:\s*"([^"]+)"$', self.actual_buffer
+            r'"([^"]+)"\s*:\s*"((?:[^"\\]|\\.)*)"$', self.actual_buffer
         ):
             self.pop()
             if len(self.keys):

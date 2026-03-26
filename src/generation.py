@@ -50,11 +50,19 @@ def generate_response(
         word = DecodeStage().process(logits, model, allowed_logits)
         if predict.get_state() == Status.FREE_TEXT and (
             re.search(
-                r'([^" \t]+)"',
+                r'([^" \t]+)(?<!\\)"',
                 predict.actual_buffer.split(":")[-1] + word,
             )
         ):
             word = word[: word.find('"') + 1]
-        sentence += word
-        predict.manage_state(word)
+        if predict.get_state() == Status.FREE_TEXT and (
+            '\\""}\n' in predict.actual_buffer
+        ):
+            predict.actual_buffer = predict.actual_buffer.replace(
+                '\\""}\n', '"'
+            )
+            sentence = sentence.replace('\\""}\n', '"')
+        else:
+            sentence += word
+            predict.manage_state(word)
     return sentence.replace(initial_prompt, "")

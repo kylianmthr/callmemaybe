@@ -257,31 +257,33 @@ class ParameterStage:
             parameter.name: parameter.type for parameter in parameters
         }
         sys_prompt = (
-            f"You are a strict text extraction engine. "
-            f"Function: {function_name}. Parameters: {parameters_dict}. \n"
+            f"you are a strict text extraction engine "
+            f"function: {function_name}, parameters: {parameters_dict} \n"
             "--- MANDATORY RULES ---\n"
-            "1. COPY PASTE ONLY: Extract values EXACTLY as "
-            "they appear. If lowercase, keep lowercase.\n"
-            "2. NO FORMATTING: Never use double asterisks (**)."
+            "1. COPY PASTE ONLY: extract values EXACTLY as "
+            "they appear if lowercase, keep lowercase.\n"
+            "2. NO FORMATTING: never use double asterisks (**)."
             " Use only '*' if needed.\n"
-            "3. NO CORRECTIONS: Do not fix spelling or capitalization.\n\n"
+            "3. NO CORRECTIONS: do not fix spelling or capitalization\n\n"
             "--- EXAMPLES ---\n"
             "Prompt: 'replace the word cat'\n"
             'JSON: {"regex": "\\\\bcat\\\\b"}\n'
-            "Prompt: 'invite alex to the party'\n"
-            'JSON: {"name": "alex"}\n'
+            "Prompt: 'Format template: Say \"hello\" to {name}'\n"
+            'JSON: {"template": "Say "hello" to {name}"}\n'
             "Prompt: 'use an asterisk here'\n"
             'JSON: {"symbol": "*"}\n'
+            "Prompt: 'use latin-1'\n"
+            'JSON: {"encoding": "latin-1"}\n'
             "--- END OF EXAMPLES ---\n"
         )
         # allowed_regex = []
         if function_name == "fn_substitute_string_with_regex":
             # allowed_regex = [r"\\d+", r"[aeiouAEIOU]", r"\\bcat\\b"]
             sys_prompt += (
-                "You can choose between this regex: "
+                "you can choose between this regex: "
                 r"- \\d+ to replace numbers "
                 r"- [aeiouAEIOU] to replace vowels "
-                "- \\\\bcat\\\\b to replace the word cat.\n"
+                "- \\\\bcat\\\\b to replace the word cat\n"
             )
         predict = JSONPredict(list(parameters_dict.keys()), [], model, True)
 
