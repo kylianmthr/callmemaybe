@@ -1,3 +1,4 @@
+import os
 from typing import Any
 from pydantic import ValidationError
 from src import parsing
@@ -143,6 +144,8 @@ def generate_output_file(
     Returns:
         None
     """
+    if os.path.isdir("data/output"):
+        os.mkdir("data/output")
     with open(filename, "w") as f:
         json.dump(generated_functions, f, indent=4, ensure_ascii=False)
 
